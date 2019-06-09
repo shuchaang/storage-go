@@ -51,7 +51,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		create.Seek(0, 0)
 		fileMeta.FileSha1 = util.Filesha1(create)
-		meta.UpdateFileMeta(fileMeta)
+		meta.InsertFileMetaInDB(fileMeta)
 		fmt.Println(fileMeta.FileSha1)
 		io.WriteString(w, "upload success")
 	}
@@ -60,7 +60,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 func FileInfoHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	fileHash := r.Form["hash"][0]
-	fMeta := meta.GetFileMeta(fileHash)
+	fMeta := meta.GetFileInfoFromDb(fileHash)
 	res, e := json.Marshal(fMeta)
 	if e == nil {
 		w.Write(res)
@@ -72,7 +72,7 @@ func FileInfoHandler(w http.ResponseWriter, r *http.Request) {
 func DownloadFile(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	fileHash := r.Form["hash"][0]
-	fMeta := meta.GetFileMeta(fileHash)
+	fMeta := meta.GetFileInfoFromDb(fileHash)
 	file, e := os.Open(fMeta.FilePath)
 	if e != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -103,9 +103,9 @@ func RenameFile(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	fileMeta := meta.GetFileMeta(hash)
+	fileMeta := meta.GetFileInfoFromDb(hash)
 	fileMeta.FileName = name
-	meta.UpdateFileMeta(fileMeta)
+	meta.UpdateFileNameFromDb(fileMeta.FileSha1, fileMeta.FileName)
 	bytes, err := json.Marshal(fileMeta)
 	if err != nil {
 		io.WriteString(w, err.Error())
@@ -119,9 +119,9 @@ func DeleteFile(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	hash := r.Form["hash"][0]
 
-	fileMeta := meta.GetFileMeta(hash)
+	fileMeta := meta.GetFileInfoFromDb(hash)
 
 	os.Remove(fileMeta.FilePath)
 
-	meta.RemoveFileMeta(hash)
+	meta.DeleteFileFromDB(hash)
 }

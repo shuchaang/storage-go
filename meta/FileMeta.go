@@ -1,6 +1,9 @@
 package meta
 
-import "fmt"
+import (
+	"cloud-storage/db"
+	"fmt"
+)
 
 //文件元信息结构体
 type FileMeta struct {
@@ -11,21 +14,29 @@ type FileMeta struct {
 	UploadTime string
 }
 
-var fileMetas map[string]FileMeta
-
-func init() {
-	fmt.Println("init fileMetas")
-	fileMetas = make(map[string]FileMeta)
+func InsertFileMetaInDB(f FileMeta) {
+	db.OnUploadFinish(f.FileSha1, f.FileName, f.FileSize, f.FilePath)
 }
 
-func UpdateFileMeta(f FileMeta) {
-	fileMetas[f.FileSha1] = f
+func GetFileInfoFromDb(sha1 string) FileMeta {
+	table, e := db.FindFileInfo(sha1)
+	if e != nil {
+		fmt.Println(e)
+		return FileMeta{}
+	}
+	meta := FileMeta{
+		FileSha1: sha1,
+		FileName: table.FileName.String,
+		FileSize: table.FileSize.Int64,
+		FilePath: table.FilePath.String,
+	}
+	return meta
 }
 
-func GetFileMeta(sha1 string) FileMeta {
-	return fileMetas[sha1]
+func UpdateFileNameFromDb(sha string, name string) bool {
+	return db.UpdateFileInfo(sha, name)
 }
 
-func RemoveFileMeta(sha1 string) {
-	delete(fileMetas, sha1)
+func DeleteFileFromDB(sha string) bool {
+	return db.DeleteFile(sha)
 }
