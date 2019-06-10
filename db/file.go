@@ -1,13 +1,13 @@
 package db
 
 import (
-	mydb "cloud-storage/db/mysql"
+	"cloud-storage/db/mysql"
 	"database/sql"
 	"fmt"
 )
 
 func OnUploadFinish(filehash string, filename string, filesize int64, fileaddr string) bool {
-	stmt, e := mydb.DBConn().Prepare("insert into tbl_file(file_sha1, file_name, file_addr, file_size,status)values (?,?,?,?,1)")
+	stmt, e := mysql.DBConn().Prepare("insert into tbl_file(file_sha1, file_name, file_addr, file_size,status)values (?,?,?,?,1)")
 	if e != nil {
 		fmt.Println(e.Error())
 		return false
@@ -29,7 +29,7 @@ type FileTable struct {
 }
 
 func FindFileInfo(sha1 string) (*FileTable, error) {
-	conn := mydb.DBConn()
+	conn := mysql.DBConn()
 	stmt, e := conn.Prepare("select file_sha1,file_name,file_size,file_addr from tbl_file where file_sha1=? and status=1 limit 1")
 	if e != nil {
 		return nil, e
@@ -44,7 +44,7 @@ func FindFileInfo(sha1 string) (*FileTable, error) {
 }
 
 func UpdateFileInfo(sha string, name string) bool {
-	conn := mydb.DBConn()
+	conn := mysql.DBConn()
 	stmt, e := conn.Prepare("update tbl_file set file_name=?,update_at=now() where file_sha1=?")
 	if e != nil {
 		fmt.Println(e)
@@ -60,7 +60,7 @@ func UpdateFileInfo(sha string, name string) bool {
 }
 
 func DeleteFile(sha string) bool {
-	conn := mydb.DBConn()
+	conn := mysql.DBConn()
 	stmt, e := conn.Prepare("update tbl_file set status=0,update_at=now() where file_sha1=?")
 	if e != nil {
 		fmt.Println(e)

@@ -33,12 +33,13 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 		fileMeta := meta.FileMeta{
 			FileName:   header.Filename,
-			FilePath:   "./tmp/" + header.Filename,
+			FilePath:   "/Users/sun7ay/Desktop/" + header.Filename,
 			UploadTime: time.Now().Format("2006-01-02 15:04:05"),
 		}
 
 		create, e := os.Create(fileMeta.FilePath)
 		if e != nil {
+			fmt.Println(e)
 			io.WriteString(w, "创建临时文件失败")
 			return
 		}
