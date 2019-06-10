@@ -36,3 +36,17 @@ create table tbl_user_token
   unique key `uk_token`(user_token),
   key        `idx_user`(user_name)
 )
+
+create table tbl_user_file(
+                            id int not null auto_increment primary key ,
+                            user_name varchar(64) not null default '',
+                            file_sha1 varchar(64) not null default '',
+                            file_size bigint not null default 0,
+                            file_name varchar(40) not null default '',
+                            upload_at datetime default current_timestamp,
+                            last_update datetime default current_timestamp on update current_timestamp,
+                            status int not null default 0,
+                            unique key uk_user_file(user_name,file_sha1),
+                            key idx_status(status),
+                            key idx_user(user_name)
+)

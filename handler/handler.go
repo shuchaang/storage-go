@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"cloud-storage/db"
 	"cloud-storage/meta"
 	"cloud-storage/util"
 	"encoding/json"
@@ -53,6 +54,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		create.Seek(0, 0)
 		fileMeta.FileSha1 = util.Filesha1(create)
 		meta.InsertFileMetaInDB(fileMeta)
+		//db.InsertUserFile()
 		fmt.Println(fileMeta.FileSha1)
 		io.WriteString(w, "upload success")
 	}
